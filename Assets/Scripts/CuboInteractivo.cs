@@ -4,17 +4,29 @@ using UnityEngine;
 
 public class CuboInteractivo : InteractableObject
 {
-    
+    public Transform objetivoDestino;
+
     void Start()
     {
-        rr.doInteraction.AddListener(ActionInteractable);
-        //base.ActionInteractable();
-    }
-    
-    protected override void ActionInteractable()
-    {
-        base.ActionInteractable();
-        Debug.Log("Estas interactuando con este cubo");
+        ConfigureListeners();
     }
 
+    void ConfigureListeners()
+    {
+        rr.doInteraction.RemoveListener(FindObjectOfType<CuboFinal>().ActionInteractable);
+        rr.doInteraction.AddListener(ActionInteractable);
+    }
+
+    public override void ActionInteractable()
+    {
+        base.ActionInteractable();
+        GameObject xrOriginObject = GameObject.Find("XR Origin");
+
+        if (xrOriginObject != null)
+        {
+            Transform xrOrigin = xrOriginObject.transform;
+
+            xrOrigin.position = objetivoDestino.position;
+        }
+    }
 }

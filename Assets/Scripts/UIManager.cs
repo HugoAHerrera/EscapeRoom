@@ -19,14 +19,9 @@ public class UIManager : MonoBehaviour
         Application.Quit();
     }
 
-    public void actualizarMarcador()
-    {
-        tiempoRestante.text = PlayerPrefs.GetInt("minutos").ToString() + ":" + PlayerPrefs.GetInt("segundos").ToString();
-    }
 
     void Start()
     {
-        actualizarMarcador();
     }
     
 }

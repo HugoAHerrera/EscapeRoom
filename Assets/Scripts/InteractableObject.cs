@@ -14,12 +14,12 @@ public class InteractableObject : MonoBehaviour
         rr.endInteraction.AddListener(StopActionInteractable);
     }
 
-    protected virtual void ActionInteractable()
+    public virtual void ActionInteractable()
     {
         this.GetComponent<MeshRenderer>().material.color = Color.yellow;
     }
 
-    protected virtual void StopActionInteractable()
+    public virtual void StopActionInteractable()
     {
         this.GetComponent<MeshRenderer>().material.color = Color.white;
     }

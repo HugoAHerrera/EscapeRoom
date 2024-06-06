@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,15 +78,22 @@ public class GameManager: Singleton<GameManager>
         if(minutos <= 0 && segundos <= 0 && recargarScene == true)
         {
             recargarScene = false;
-            actualizarMarcador();
             RestartGame();
             Destroy(this.gameObject);
         }else{
-            timer -= Time.deltaTime; 
-            minutos = (int)timer/60;
-            segundos = (int)timer%60;
-            tiempoCrono[0].text = minutos.ToString() + ":" + segundos.ToString();
-            tiempoCrono[1].text = minutos.ToString() + ":" + segundos.ToString();
+            if (SceneManager.GetSceneByBuildIndex(1).isLoaded)
+            {
+                timer -= Time.deltaTime;
+                minutos = (int)timer / 60;
+                segundos = (int)timer % 60;
+                try
+                {
+                    tiempoCrono[0].text = minutos.ToString() + ":" + segundos.ToString();
+                    tiempoCrono[1].text = minutos.ToString() + ":" + segundos.ToString();
+                }
+                catch (NullReferenceException ex)
+                {}
+            }
         }
     }
 
@@ -94,13 +102,13 @@ public class GameManager: Singleton<GameManager>
         
         int i = 0;
 
-        yield return new WaitForSeconds(Random.Range(3, 8));
+        yield return new WaitForSeconds(UnityEngine.Random.Range(3, 8));
         //En la sala del garaje solo es aleatoria la posición del martillo:
-        Instantiate(pistasGaraje[0], positionsToSpawnPistasGaraje[Random.Range(0,positionsToSpawnPistasGaraje.Length-1)]);
+        Instantiate(pistasGaraje[0], positionsToSpawnPistasGaraje[UnityEngine.Random.Range(0,positionsToSpawnPistasGaraje.Length-1)]);
 
         while(i<pistasMedieval.Length){
             //En la sala medieval es aleatoria la pista que hay en cada posición
-            yield return new WaitForSeconds(Random.Range(3, 8));
+            yield return new WaitForSeconds(UnityEngine.Random.Range(3, 8));
             //Instantiate(pistasMedieval[Random.Range(0,pistasGaraje.Length-1)], positionsToSpawnPistasMedieval[i]);
             Instantiate(pistasMedieval[i], positionsToSpawnPistasMedieval[i]);
             //
@@ -129,7 +137,6 @@ public class GameManager: Singleton<GameManager>
 
     public void actualizarMarcador()
     {
-        //Las puertas cruzadas correctamente tienen prioridad a las gemas
         if(minutos > PlayerPrefs.GetInt("minutos"))
         {
             PlayerPrefs.SetInt("mintos", (int) minutos);
@@ -152,127 +159,4 @@ public class GameManager: Singleton<GameManager>
     public void activarPanel(){
         panelControl_mov.enabled = true;
     }
-    /*
-    private int vida = 0;
-    public Text vidaTotal;
-
-    private int caminoCorrecto = 0;
-
-    public Text tiempoCrono;
-    private float timer = 180;
-    
-    //Variable que se vuelve true cuando el jugador se mueve y empieza a restar tiempo
-    private bool restarTiempo = false;
-
-    private bool recargarScene = true;
-
-    private float minutos;
-    private float segundos;
-
-    public GameObject[] gemasToSpawn;
-    public Transform[] positionsToSpawn;
-
-    private void Start()
-    {
-        vidaTotal.text = "Gemas: 0  Camino: 0"; 
-        StartCoroutine(SpawnGems());
-        recargarScene = true;
-        minutos = (int)timer/60;
-        segundos = (int)timer%60;
-        tiempoCrono.text = minutos.ToString() + "' " + segundos.ToString() + "''";
-        DontDestroyOnLoad(this);
-    }
-
-    void Update()
-    {
-        if(minutos <= 0 && segundos <= 0 && recargarScene == true)
-        {
-            recargarScene = false;
-            actualizarMarcador();
-            RestartGame();
-
-            //Esta es la solución que he encontrado porque el Singleton no me funciona y se crean muchos GameManager
-            Destroy(this.gameObject);
-        }else{
-            if(Input.GetKey(KeyCode.W)){
-                restarTiempo = true;
-            }
-            if(restarTiempo == true){
-                timer -= Time.deltaTime; 
-                minutos = (int)timer/60;
-                segundos = (int)timer%60;
-            }
-            tiempoCrono.text = minutos.ToString() + "' " + segundos.ToString() + "''";
-        }
-    }
-
-    //Reinicia el juego y carga la misma escena
-    public void RestartGame()
-    {
-        vida = 0;
-        caminoCorrecto = 0;
-        timer = 180;
-        StopCoroutine(SpawnGems());
-        SceneManager.LoadScene(0);
-    }
-
-    private void StopSpawningGemsCoroutine()
-    {
-        StopCoroutine(SpawnGems());
-    }
-
-    public IEnumerator SpawnGems()
-    {
-        int i = 0;
-        while(i<5){
-            yield return new WaitForSeconds(Random.Range(2, 4));
-            //Instrucción que se incluye en mi coroutina
-            Instantiate(gemasToSpawn[Random.Range(0, 10)], positionsToSpawn[i]);
-            //
-            i++;
-        }
-
-        StopSpawningGemsCoroutine();
-    }
-
-    public void sumarVida(){
-        vida++;
-        vidaTotal.text = "Gemas: " + vida.ToString() + " Camino: " + caminoCorrecto.ToString();
-    }
-
-    public void iniciarCuenta()
-    {
-        //Debug.Log(caminoCorrecto + " " + vida);
-        timer = 4;
-        vidaTotal.GetComponent<Text>().color = Color.red;
-        tiempoCrono.GetComponent<Text>().color = Color.red;
-        vidaTotal.text = "CUENTA ATRÁS";
-        if(timer <= 0)
-        {
-            RestartGame();
-        }
-    }
-
-    public void sumarCamino()
-    {
-        caminoCorrecto++;
-        vidaTotal.text = "Gemas: " + vida.ToString() + " Camino: " + caminoCorrecto.ToString();
-    }
-
-    public void actualizarMarcador()
-    {
-        //Las puertas cruzadas correctamente tienen prioridad a las gemas
-        if(caminoCorrecto > PlayerPrefs.GetInt("numLab"))
-        {
-            PlayerPrefs.SetInt("numLab", caminoCorrecto);
-            PlayerPrefs.SetInt("numGemas", vida);
-        }else if(caminoCorrecto == PlayerPrefs.GetInt("numLab"))
-        {
-            if(vida > PlayerPrefs.GetInt("numGemas"))
-            {
-                PlayerPrefs.SetInt("numGemas", vida);
-            }
-        }
-    }*/
-
 }
